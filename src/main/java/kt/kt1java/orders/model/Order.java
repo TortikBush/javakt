@@ -25,18 +25,16 @@ public class Order {
 
     private LocalDate orderDate;
 
-    // Конструкторы, геттеры и сеттеры
 
     public Order() {
-        this.orderDate = LocalDate.now();  // по умолчанию дата создания заказа - сегодня
+        this.orderDate = LocalDate.now();
     }
-
     public Order(String product, int quantity, BigDecimal price, String status) {
         this.product = product;
         this.quantity = quantity;
         this.price = price;
         this.status = status;
-        this.orderDate = LocalDate.now();  // по умолчанию дата создания заказа - сегодня
+        this.orderDate = LocalDate.now();
     }
 
     public Long getId() {

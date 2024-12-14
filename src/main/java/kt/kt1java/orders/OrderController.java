@@ -1,7 +1,9 @@
 package kt.kt1java.orders;
 
 
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import kt.kt1java.orders.model.Order;
 import kt.kt1java.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,41 +20,46 @@ import java.util.Optional;
 @Validated
 public class OrderController {
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
 
-    // Создание нового заказа
+    @Autowired
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
     @PostMapping
+    @Operation(summary = "Create a new order")
     public ResponseEntity<Order> createOrder(@Valid @RequestBody Order order) {
         Order createdOrder = orderService.createOrder(order);
         return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
     }
 
-    // Получение всех заказов
     @GetMapping
-    public List<Order> getAllOrders() {
-        return orderService.getAllOrders();
+    @Operation(summary = "Get all orders")
+    public ResponseEntity<List<Order>> getAllOrders() {
+        List<Order> orders = orderService.getAllOrders();
+        return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
-    // Получение конкретного заказа по ID
     @GetMapping("/{id}")
+    @Operation(summary = "Get order by ID")
     public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
         Optional<Order> order = orderService.getOrderById(id);
-        return order.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return order.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    // Обновление заказа по ID
     @PutMapping("/{id}")
-    public ResponseEntity<Order> updateOrder(@PathVariable Long id, @Valid @RequestBody Order order) {
-        Order updatedOrder = orderService.updateOrder(id, order);
-        return updatedOrder != null ? ResponseEntity.ok(updatedOrder) : ResponseEntity.notFound().build();
+    @Operation(summary = "Update order by ID")
+    public ResponseEntity<Order> updateOrder(@PathVariable Long id, @Valid @RequestBody Order orderDetails) {
+        Order updatedOrder = orderService.updateOrder(id, orderDetails);
+        return ResponseEntity.ok(updatedOrder);
     }
 
-    // Удаление заказа по ID
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete order by ID")
+    @ApiResponse(responseCode = "204", description = "Order deleted successfully")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        boolean isDeleted = orderService.deleteOrder(id);
-        return isDeleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        orderService.deleteOrder(id);
+        return ResponseEntity.noContent().build();
     }
 }
-
